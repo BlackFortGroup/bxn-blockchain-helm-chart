@@ -22,9 +22,9 @@ jobs:
       - name: Setup Kubernetes context
         uses: azure/k8s-set-context@v3
         with:
-          method: service-account
-          k8s-url: ${{ secrets.EKS_ENDPOINT }}
-          k8s-secret: ${{ secrets.EKS_SA_SECRET }}
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          context: ${{ secrets.CONTEXT }}
 
       - name: Deploy Genesis
         run: |
