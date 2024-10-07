@@ -17,7 +17,7 @@ aws sts get-caller-identity
 aws eks --region "${AWS_REGION}" update-kubeconfig --name "${CLUSTER_NAME}"
 
 helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
-helm install --namespace kube-system --create-namespace csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver
+helm upgrade --install --namespace kube-system --create-namespace csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver
 kubectl apply -f https://raw.githubusercontent.com/aws/secrets-store-csi-driver-provider-aws/main/deployment/aws-provider-installer.yaml 
 
 # If you have deployed the above policy before, acquire its ARN:
@@ -35,5 +35,5 @@ then
   }')
 fi
 
-eksctl create iamserviceaccount --name quorum-sa --namespace "${NAMESPACE}" --region="${AWS_REGION}" --cluster "${CLUSTER_NAME}" --attach-policy-arn "$POLICY_ARN" --approve --override-existing-serviceaccounts
+eksctl create iamserviceaccount --name quorum-sa --namespace "${AKS_NAMESPACE}" --region="${AWS_REGION}" --cluster "${CLUSTER_NAME}" --attach-policy-arn "$POLICY_ARN" --approve --override-existing-serviceaccounts
 echo "Done... "

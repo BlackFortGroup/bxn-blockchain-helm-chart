@@ -20,6 +20,10 @@ data:
     # If it is a number or boolean make it a number or boolean
     # All other config options are strings, and must be quoted.
 
+    {{ if  .Values.node.besu.testnet -}}
+    network="holesky"
+    {{ end }}
+
     # Node Information
     data-path={{ .Values.node.besu.dataPath | quote }}
     genesis-file={{ .Values.node.besu.genesisFilePath | quote }}
