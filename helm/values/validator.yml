@@ -31,7 +31,8 @@ azure:
 
 node:
   besu:
-    envBesuOpts: ""  
+    testnet: true
+    envBesuOpts: ""
     metrics:
       serviceMonitorEnabled: true
     resources:
