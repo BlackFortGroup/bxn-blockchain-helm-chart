@@ -13,7 +13,7 @@ metadata:
       rewrite (?i)/tessera-[0-9]?$ / break;
       rewrite (?i)/kibana/(.*) /$1 break;
       rewrite (?i)/kibana$ / break;
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
     #nginx.ingress.kubernetes.io/whitelist-source-range: w.x.y.z/32,a.b.c.d/32
 
 spec:
@@ -21,7 +21,7 @@ spec:
   - host: rpc.blackfort.network
     http:
       paths:
-      - path: /testnet/rpc
+      - path: /testnet/rpc(/|$)(.*)
         pathType: Prefix
         backend:
           service:
@@ -105,7 +105,7 @@ spec:
             name: kibana-kibana
             port:
               number: 5601
-      - path: /testnet
+      - path: /testnet(/|$)(.*)
         pathType: Prefix
         backend:
           service:
