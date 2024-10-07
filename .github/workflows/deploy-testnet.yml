@@ -53,3 +53,7 @@ jobs:
       - name: Deploy RPC
         run: |
           helm upgrade -i rpc-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/reader.yml
+
+      - name: Deploy Ingress
+        run: |
+          kubectl apply -f ./ingress/ingress-rules-besu.yml -n ${{ vars.NAMESPACE }}
