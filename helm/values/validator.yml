@@ -40,3 +40,7 @@ node:
       cpuRequest: 0.5
       memLimit: "2G"
       memRequest: "1G"
+    rpc:
+      authenticationEnabled: true
+      authenticationJWTKeyFile: "/keys/publicKey.pem"
+      authenticationJWTSecret: "besu-node-jwt-publicKey"

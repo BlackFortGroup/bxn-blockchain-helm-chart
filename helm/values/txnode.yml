@@ -31,7 +31,8 @@ azure:
 
 node:
   besu:
-    envBesuOpts: ""  
+    testnet: true
+    envBesuOpts: ""
     metrics:
       serviceMonitorEnabled: true
     resources:
@@ -41,6 +42,10 @@ node:
       memRequest: "1G"
     account:
       password: 'password'
+    rpc:
+      authenticationEnabled: true
+      authenticationJWTKeyFile: "/keys/publicKey.pem"
+      authenticationJWTSecret: "besu-node-jwt-publicKey"
   tessera:
     resources:
       cpuLimit: 1

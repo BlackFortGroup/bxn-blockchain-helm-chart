@@ -47,8 +47,8 @@ jobs:
       - name: Deploy Members
         run: |
           helm upgrade -i member-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
-          helm upgrade -i member-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
-          helm upgrade -i member-3 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
+#           helm upgrade -i member-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
+#           helm upgrade -i member-3 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
 
       - name: Deploy RPC
         run: |

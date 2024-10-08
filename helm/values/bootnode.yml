@@ -20,6 +20,7 @@ aws:
 
 node:
   besu:
+    testnet: true
     envBesuOpts: ""  
     metrics:
       serviceMonitorEnabled: true
@@ -32,4 +33,7 @@ node:
       password: 'password'
     customLabels:
       nodeType: bootnode
-
+    rpc:
+      authenticationEnabled: true
+      authenticationJWTKeyFile: "/keys/publicKey.pem"
+      authenticationJWTSecret: "besu-node-jwt-publicKey"
