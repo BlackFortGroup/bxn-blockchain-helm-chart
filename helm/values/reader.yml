@@ -43,7 +43,7 @@ node:
     account:
       password: 'password'
     rpc:
-      authenticationEnabled: true
+      authenticationEnabled: false
       authenticationJWTKeyFile: "/keys/publicKey.pem"
       authenticationJWTSecret: "besu-node-jwt-publicKey"
   tessera:
