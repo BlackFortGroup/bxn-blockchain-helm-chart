@@ -43,6 +43,7 @@ node:
     account:
       password: 'password'
     rpc:
+      api: '["DEBUG","ETH", "WEB3", "IBFT", "NET", "TRACE", "EEA", "PRIV", "QBFT", "PERM", "TXPOOL"]'
       authenticationEnabled: false
       authenticationJWTKeyFile: "/keys/publicKey.pem"
       authenticationJWTSecret: "besu-node-jwt-publicKey"
