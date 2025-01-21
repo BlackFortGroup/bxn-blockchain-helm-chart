@@ -1,0 +1,59 @@
+name: Mainnet Deploy
+
+on:
+  push:
+    branches:
+      - mainnet
+
+jobs:
+  eks-helm-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: mainnet
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Kubernetes context
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          context: ${{ secrets.CONTEXT }}
+
+      - name: Deploy Genesis
+        run: |
+          helm upgrade -i genesis ./helm/charts/besu-genesis -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/genesis-besu.yml
+
+      - name: Deploy Boot nodes
+        run: |
+          helm upgrade -i bootnode-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/bootnode.yml
+          helm upgrade -i bootnode-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/bootnode.yml
+
+      - name: Deploy Validators
+        run: |
+          helm upgrade -i validator-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/validator.yml
+          helm upgrade -i validator-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/validator.yml
+          helm upgrade -i validator-3 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/validator.yml
+          helm upgrade -i validator-4 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/validator.yml
+
+      - name: Deploy Members
+        run: |
+          helm upgrade -i member-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
+          helm upgrade -i member-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
+          helm upgrade -i member-3 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
+
+      - name: Deploy RPC
+        run: |
+          helm upgrade -i rpc-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/reader.yml
+
+      - name: Deploy Ingress
+        run: |
+          kubectl apply -f ./ingress/ingress-rules-besu.yml -n ${{ vars.NAMESPACE }}

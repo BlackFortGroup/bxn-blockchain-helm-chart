@@ -31,7 +31,8 @@ azure:
 
 node:
   besu:
-    envBesuOpts: ""  
+    testnet: true
+    envBesuOpts: ""
     metrics:
       serviceMonitorEnabled: true
     resources:
@@ -41,15 +42,10 @@ node:
       memRequest: "1G"
     account:
       password: 'password'
-  goquorum:
-    metrics:
-      serviceMonitorEnabled: true
-    resources:
-      cpuLimit: 1
-      cpuRequest: 0.1
-      memLimit: "2G"
-      memRequest: "1G"
-    account:
-      password: 'password'
+    rpc:
+      api: '["DEBUG","ETH", "WEB3", "IBFT", "NET", "TRACE", "EEA", "PRIV", "QBFT", "PERM", "TXPOOL"]'
+      authenticationEnabled: false
+      authenticationJWTKeyFile: "/keys/publicKey.pem"
+      authenticationJWTSecret: "besu-node-jwt-publicKey"
   tessera:
     password: 'password'

@@ -17,20 +17,10 @@ aws:
   # the region you are deploying to
   region: eu-central-1
 
-azure:
-  serviceAccountName: quorum-sa
-  # the clientId of the user assigned managed identity created in the template
-  identityClientId: azure-clientId
-  # the clientId of the user assigned managed identity in the node pool's resource group
-  nodePoolIdentityClientId: azure-clientId
-  keyvaultName: azure-keyvault
-  # the tenant ID of the key vault
-  tenantId: azure-tenantId
-  # the subscription ID to use - this needs to be set explicitly when using multi tenancy
-  subscriptionId: azure-subscriptionId
 
 node:
   besu:
+    testnet: true
     envBesuOpts: ""  
     metrics:
       serviceMonitorEnabled: true
@@ -43,4 +33,7 @@ node:
       password: 'password'
     customLabels:
       nodeType: bootnode
-
+    rpc:
+      authenticationEnabled: true
+      authenticationJWTKeyFile: "/keys/publicKey.pem"
+      authenticationJWTSecret: "besu-node-jwt-publicKey"

@@ -20,6 +20,10 @@ data:
     # If it is a number or boolean make it a number or boolean
     # All other config options are strings, and must be quoted.
 
+    {{ if  .Values.node.besu.testnet -}}
+    network="holesky"
+    {{ end }}
+
     # Node Information
     data-path={{ .Values.node.besu.dataPath | quote }}
     genesis-file={{ .Values.node.besu.genesisFilePath | quote }}
@@ -48,6 +52,7 @@ data:
     rpc-http-api={{ .Values.node.besu.rpc.api }}
     rpc-http-cors-origins={{ .Values.node.besu.rpc.corsOrigins }}
     rpc-http-authentication-enabled={{ .Values.node.besu.rpc.authenticationEnabled }}
+    rpc-http-authentication-jwt-public-key-file='{{ .Values.node.besu.rpc.authenticationJWTKeyFile }}'
     rpc-http-max-active-connections={{ .Values.node.besu.rpc.maxActiveConnections }}
     revert-reason-enabled=true
     {{ end }}
