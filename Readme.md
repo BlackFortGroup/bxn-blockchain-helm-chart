@@ -1,3 +1,19 @@
+### General information
+
+Chain ID `testnet` **4888**
+
+Chain ID `mainnet` **488**
+
+#### Main API URLs
+
+https://rpc.blackfort.network/mainnet/rpc - node reader `mainnet`
+
+https://rpc.blackfort.network/mainnet/validator-1 - validator `mainnet`
+
+https://rpc.blackfort.network/testnet/rpc - node reader `testnet`
+
+https://rpc.blackfort.network/testnet/validator-1 - validator `testnet`
+
 ### Deployment Process
 
 The deployment is performed via GitHub Actions from the `testnet` and `mainnet` branches for their respective environments.
