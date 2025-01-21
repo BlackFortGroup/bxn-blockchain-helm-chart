@@ -28,6 +28,12 @@ jobs:
           kubeconfig: ${{ secrets.KUBECONFIG }}
           context: ${{ secrets.CONTEXT }}
 
+      - name: Decrypt gpg secret
+        run: |
+          gpg --quiet --batch --yes --decrypt --passphrase="$GPG_SECRET_PASSPHRASE" --output helm/charts/besu-genesis/genesis.json
+        env:
+          GPG_SECRET_PASSPHRASE: ${{ secrets.GPG_SECRET_PASSPHRASE }}
+
       - name: Deploy Genesis
         run: |
           helm upgrade -i genesis ./helm/charts/besu-genesis -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/genesis-besu.yml

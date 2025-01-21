@@ -117,7 +117,9 @@ spec:
 
               echo $FOLDER_PATH
               echo "Creating genesis configmap in k8s ..."
+              {{- if empty .Values.genesisLocalFile }}
               safeWriteGenesisConfigmap $FOLDER_PATH
+              {{- end }}
 
               # create the static-nodes with proper dns names for the quorum nodes
               echo "[" > $FOLDER_PATH/static-nodes.json
@@ -130,20 +132,20 @@ spec:
 
 {{- if and (ne .Values.cluster.provider "local") (.Values.cluster.cloudNativeServices) }}
 
-                  safeWriteSecret besu-node-validator-${i}-nodekey $FOLDER_PATH/${f}/nodekey
-                  safeWriteSecret besu-node-validator-${i}-nodekeypub $FOLDER_PATH/${f}/nodekey.pub 
-                  safeWriteSecret besu-node-validator-${i}-enode $FOLDER_PATH/${f}/nodekey.pub 
-                  safeWriteSecret besu-node-validator-${i}-address $FOLDER_PATH/${f}/address
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-nodekey $FOLDER_PATH/${f}/nodekey
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-nodekeypub $FOLDER_PATH/${f}/nodekey.pub
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-enode $FOLDER_PATH/${f}/nodekey.pub
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-address $FOLDER_PATH/${f}/address
                   kubectl create configmap --namespace {{ .Release.Namespace }} besu-node-validator-${i}-address --from-file=address=$FOLDER_PATH/${f}/address
 
-                  safeWriteSecret besu-node-validator-${i}-accountPrivateKey $FOLDER_PATH/${f}/accountPrivateKey
-                  safeWriteSecret besu-node-validator-${i}-accountPassword $FOLDER_PATH/${f}/accountPassword
-                  safeWriteSecret besu-node-validator-${i}-accountKeystore $FOLDER_PATH/${f}/accountKeystore 
-                  safeWriteSecret besu-node-validator-${i}-accountAddress $FOLDER_PATH/${f}/accountAddress 
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-accountPrivateKey $FOLDER_PATH/${f}/accountPrivateKey
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-accountPassword $FOLDER_PATH/${f}/accountPassword
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-accountKeystore $FOLDER_PATH/${f}/accountKeystore
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-accountAddress $FOLDER_PATH/${f}/accountAddress
 
 {{- else }}
                   
-                  safeWriteSecret besu-node-validator-${i} "$FOLDER_PATH/${f}"
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i} "$FOLDER_PATH/${f}"
                   kubectl create configmap --namespace {{ .Release.Namespace }} besu-node-validator-${i}-address --from-file=address=$FOLDER_PATH/${f}/address
 
 {{- end }}

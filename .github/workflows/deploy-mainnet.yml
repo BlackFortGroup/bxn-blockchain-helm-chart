@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: mainnet
+    env:
+      ACCOUNT_PASSWORD: ${{ secrets.ACCOUNT_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,31 +30,54 @@ jobs:
           kubeconfig: ${{ secrets.KUBECONFIG }}
           context: ${{ secrets.CONTEXT }}
 
+      - name: Decrypt gpg secret
+        run: |
+          gpg --quiet --batch --yes --decrypt --passphrase="$GPG_SECRET_PASSPHRASE" --output helm/charts/besu-genesis/genesis.json
+        env:
+          GPG_SECRET_PASSPHRASE: ${{ secrets.GPG_SECRET_PASSPHRASE }}
+
       - name: Deploy Genesis
         run: |
-          helm upgrade -i genesis ./helm/charts/besu-genesis -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/genesis-besu.yml
+          helm upgrade -i genesis-mainnet ./helm/charts/besu-genesis -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/genesis-besu.yml
 
       - name: Deploy Boot nodes
         run: |
-          helm upgrade -i bootnode-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/bootnode.yml
-          helm upgrade -i bootnode-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/bootnode.yml
+          helm upgrade -i bootnode-mainnet-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/bootnode.yml
+          helm upgrade -i bootnode-mainnet-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/bootnode.yml
 
       - name: Deploy Validators
         run: |
-          helm upgrade -i validator-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/validator.yml
-          helm upgrade -i validator-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/validator.yml
-          helm upgrade -i validator-3 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/validator.yml
-          helm upgrade -i validator-4 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/validator.yml
+          helm upgrade -i validator-mainnet-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/validator.yml
+          helm upgrade -i validator-mainnet-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/validator.yml
+          helm upgrade -i validator-mainnet-3 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/validator.yml
+          helm upgrade -i validator-mainnet-4 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/validator.yml
+          helm upgrade -i validator-mainnet-5 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/validator.yml
+          helm upgrade -i validator-mainnet-6 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/validator.yml
 
       - name: Deploy Members
         run: |
-          helm upgrade -i member-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
-          helm upgrade -i member-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
-          helm upgrade -i member-3 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/txnode.yml
+          helm upgrade -i member-mainnet-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/txnode.yml
+          helm upgrade -i member-mainnet-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/txnode.yml
+          helm upgrade -i member-mainnet-3 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/txnode.yml
 
       - name: Deploy RPC
         run: |
-          helm upgrade -i rpc-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace -f ./helm/values/reader.yml
+          helm upgrade -i rpc-mainnet-1 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/reader.yml
+          helm upgrade -i rpc-mainnet-2 ./helm/charts/besu-node -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUN
+T_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/reader.yml
 
       - name: Deploy Ingress
         run: |

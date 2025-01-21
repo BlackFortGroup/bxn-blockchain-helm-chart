@@ -1,0 +1,18 @@
+{{- if .Values.genesisLocalFile }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: besu-genesis
+  labels:
+    app.kubernetes.io/name: besu-genesis-job
+    app.kubernetes.io/component: genesis-job
+    app.kubernetes.io/part-of: {{ include "besu-genesis.fullname" . }}
+    app.kubernetes.io/namespace: {{ .Release.Namespace }}
+    app.kubernetes.io/release: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: helm
+  namespace: {{ .Release.Namespace }}
+data:
+  genesis.json: |-
+{{ .Files.Get .Values.genesisLocalFile | indent 4}}
+{{- end -}}
