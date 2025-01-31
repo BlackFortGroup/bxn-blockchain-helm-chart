@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: besu-genesis
+  name: besu-genesis-init
   labels:
     app.kubernetes.io/name: besu-genesis-job
     app.kubernetes.io/component: genesis-job

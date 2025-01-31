@@ -30,7 +30,12 @@ rawGenesisConfig:
   blockchain:
     nodes:
       generate: true
-      count: 4
+      count: 5
     accountPassword: 'password'
 
 genesisLocalFile: genesis.json
+
+image:
+  repository: consensys/quorum-k8s-hooks
+  tag: qgt-0.2.20
+  pullPolicy: IfNotPresent

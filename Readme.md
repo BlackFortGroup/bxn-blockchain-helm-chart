@@ -35,6 +35,16 @@ Configuration of the HELM charts is managed using variable files, which are loca
 Service endpoints are configured via **Ingress**, with its configuration located at:
 - `./ingress/ingress-rules-besu.yml`
 
+#### Genesis File
+Encrypted genesis files for testnet and mainnet
+- `./genesis-testnet.json.gpg`
+- `./genesis-mainnet.json.gpg`
+
+#### Validator Keys
+Encrypted validator keys files for testnet and mainnet
+- `./validator-key-testnet.yaml.gpg`
+- `./validator-key-mainnet.yaml.gpg`
+
 #### IMPORTANT
 If needed to increase the number of any services (e.g., the number of `validator` instances), the services must be added in the corresponding workflow files:
 - `./.github/workflows/deploy-mainnet.yml` for the `mainnet` environment
