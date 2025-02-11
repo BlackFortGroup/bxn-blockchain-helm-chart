@@ -16,7 +16,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded"
-    helm.sh/hook: "pre-install"
+    helm.sh/hook: "post-install"
 spec:
   # backoffLimit: 3
   completions: 1
