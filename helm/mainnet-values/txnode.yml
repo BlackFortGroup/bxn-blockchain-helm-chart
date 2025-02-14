@@ -9,7 +9,7 @@ quorumFlags:
 cluster:
   provider: aws  # choose from: local | aws | azure
   cloudNativeServices: true
-  reclaimPolicy: Delete # set to either Retain or Delete; note that PVCs and PVs will still exist after a 'helm delete'. Setting to Retain will keep volumes even if PVCs/PVs are deleted in kubernetes. Setting to Delete will remove volumes from EC2 EBS when PVC is deleted
+  reclaimPolicy: Retain # set to either Retain or Delete; note that PVCs and PVs will still exist after a 'helm delete'. Setting to Retain will keep volumes even if PVCs/PVs are deleted in kubernetes. Setting to Delete will remove volumes from EC2 EBS when PVC is deleted
 
 aws:
   # the aws cli commands uses the name 'quorum-sa' so only change this if you altered the name
@@ -31,21 +31,20 @@ azure:
 
 node:
   besu:
-    testnet: true
     envBesuOpts: ""
     metrics:
       serviceMonitorEnabled: true
     resources:
-      cpuLimit: 1
-      cpuRequest: 0.5
-      memLimit: "2G"
+      cpuLimit: 4
+      cpuRequest: 0.1
+      memLimit: "4G"
       memRequest: "1G"
-    account:
-      password: 'password'
     rpc:
-      api: '["DEBUG","ETH", "WEB3", "IBFT", "NET", "TRACE", "EEA", "PRIV", "QBFT", "PERM", "TXPOOL"]'
-      authenticationEnabled: false
+      authenticationEnabled: true
       authenticationJWTKeyFile: "/keys/publicKey.pem"
-      authenticationJWTSecret: "besu-node-jwt-publicKey"
-  tessera:
-    password: 'password'
+      authenticationJWTSecret: "besu-node-jwt-publicKey-mainnet"
+    tolerations:
+      - key: "special"
+        operator: "Equal"
+        value: "mainnet"
+        effect: "NoExecute"

@@ -16,6 +16,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook-delete-policy: "hook-succeeded"
+    helm.sh/hook: "post-install"
 spec:
   # backoffLimit: 3
   completions: 1
@@ -69,7 +70,7 @@ spec:
               az account set --subscription {{ .Values.azure.subscriptionId }}
 
 {{- else if and (eq .Values.cluster.provider "aws") (.Values.cluster.cloudNativeServices) }}
-              
+
               function safeWriteSecret {
                 key=$1
                 fpath=$2
@@ -83,7 +84,7 @@ spec:
               }
 
 {{- else }}
-              
+
               function safeWriteSecret {
                 key=$1
                 fpath=$2
@@ -108,8 +109,54 @@ spec:
                 fi
               }
 
+              function safeUpdateGenesisConfigmap {
+                FOLDER_PATH=$1
+                sleep 3
+                kubectl get configmap --namespace {{ .Release.Namespace }} besu-genesis-init -o jsonpath='{.data.genesis\.json}' > /tmp/genesis-old.json
+                ALLOC_UPDATES="{}"
+                for f in $(find $FOLDER_PATH -type d -iname "validator*" -exec basename {} \;)
+                do
+                  file="$FOLDER_PATH/${f}/accountAddress"
+                  if [[ -f "$file" ]]; then
+                    VALUE=$(cat "$file")
+                    echo "validator${f}"
+                    ALLOC_UPDATES=$(echo "$ALLOC_UPDATES" | jq ". + {\"$VALUE\": {\"balance\": \"1000000000000000000000000000\"}}")
+                  fi
+                done
+                jq ".alloc |= . + $ALLOC_UPDATES" /tmp/genesis-old.json > /tmp/genesis.json
+
+                kubectl create configmap --namespace {{ .Release.Namespace }} besu-genesis --from-file=genesis.json=/tmp/genesis.json
+
+              }
+
+              {{- if .Values.key_validators }}
+              function replaceKeyValidators {
+                {{- range .Values.key_validators }}
+                declare -a {{ .name }}=( {{ range $index, $arg := .args }}{{ if $index }} {{ end }}"{{ $arg }}"{{ end }} )
+                {{- end }}
+                for f in $(find $FOLDER_PATH -type d -iname "validator*" -exec basename {} \;)
+                do
+                  ADDRESS="${f}[0]"
+                  NODEKEY="${f}[1]"
+                  NODEKEYPUB="${f}[2]"
+
+                  echo "Replace AccountAddress ${f}"
+                  echo "0x${!ADDRESS}" > "$FOLDER_PATH/$f/accountAddress"
+                  echo "0x${!NODEKEY}" > "$FOLDER_PATH/$f/accountPrivateKey"
+                  echo "Replace NodeKey ${f}"
+                  echo ${!NODEKEY} > $FOLDER_PATH/${f}/nodekey
+                  echo ${!NODEKEYPUB} > $FOLDER_PATH/${f}/nodekey.pub
+                  echo ${!ADDRESS} > $FOLDER_PATH/${f}/address
+                done
+              }
+
+              {{- end }}
               echo "Creating config ..."
               FOLDER_PATH=$(quorum-genesis-tool --consensus {{ .Values.rawGenesisConfig.genesis.config.algorithm.consensus }} {{ if .Values.rawGenesisConfig.blockchain.nodes.generate }} --validators {{ .Values.rawGenesisConfig.blockchain.nodes.count }} {{ else }} --validators 0 {{ end }} --members 0 --bootnodes 0 --chainID {{ .Values.rawGenesisConfig.genesis.config.chainId }} --blockperiod {{ .Values.rawGenesisConfig.genesis.config.algorithm.blockperiodseconds }} --epochLength {{ .Values.rawGenesisConfig.genesis.config.algorithm.epochlength }} --requestTimeout {{ .Values.rawGenesisConfig.genesis.config.algorithm.requesttimeoutseconds }} --difficulty {{ .Values.rawGenesisConfig.genesis.difficulty }} --gasLimit {{ .Values.rawGenesisConfig.genesis.gasLimit }} --coinbase {{ .Values.rawGenesisConfig.genesis.coinbase }} {{ if .Values.rawGenesisConfig.blockchain.accountPassword }} --accountPassword {{ .Values.rawGenesisConfig.blockchain.accountPassword }} {{ end }} --quickstartDevAccounts {{ .Values.rawGenesisConfig.genesis.includeQuickStartAccounts }} --alloc {{ if .Values.rawGenesisConfig.genesis.alloc }} '{{ .Values.rawGenesisConfig.genesis.alloc | toJson }}' {{ else }} '{}' {{ end }} --outputPath /generated-config | tail -1 | sed -e "s/^Artifacts in folder: //")
+
+              {{- if .Values.key_validators }}
+              replaceKeyValidators
+              {{- end }}
 
               echo "Creating bootnodes configmap in k8s ..."
               echo "[]" > /tmp/besu-bootnodes
@@ -117,11 +164,16 @@ spec:
 
               echo $FOLDER_PATH
               echo "Creating genesis configmap in k8s ..."
+              {{- if empty .Values.genesisLocalFile }}
               safeWriteGenesisConfigmap $FOLDER_PATH
+              {{- else }}
+              safeUpdateGenesisConfigmap $FOLDER_PATH
+              {{- end }}
 
               # create the static-nodes with proper dns names for the quorum nodes
               echo "[" > $FOLDER_PATH/static-nodes.json
               echo "Creating validator secrets in k8s ..."
+
               i=1
               for f in $(find $FOLDER_PATH -type d -iname "validator*" -exec basename {} \;); do
                 if [ -d $FOLDER_PATH/${f} ]; then
@@ -130,26 +182,26 @@ spec:
 
 {{- if and (ne .Values.cluster.provider "local") (.Values.cluster.cloudNativeServices) }}
 
-                  safeWriteSecret besu-node-validator-${i}-nodekey $FOLDER_PATH/${f}/nodekey
-                  safeWriteSecret besu-node-validator-${i}-nodekeypub $FOLDER_PATH/${f}/nodekey.pub 
-                  safeWriteSecret besu-node-validator-${i}-enode $FOLDER_PATH/${f}/nodekey.pub 
-                  safeWriteSecret besu-node-validator-${i}-address $FOLDER_PATH/${f}/address
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-nodekey $FOLDER_PATH/${f}/nodekey
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-nodekeypub $FOLDER_PATH/${f}/nodekey.pub
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-enode $FOLDER_PATH/${f}/nodekey.pub
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-address $FOLDER_PATH/${f}/address
                   kubectl create configmap --namespace {{ .Release.Namespace }} besu-node-validator-${i}-address --from-file=address=$FOLDER_PATH/${f}/address
 
-                  safeWriteSecret besu-node-validator-${i}-accountPrivateKey $FOLDER_PATH/${f}/accountPrivateKey
-                  safeWriteSecret besu-node-validator-${i}-accountPassword $FOLDER_PATH/${f}/accountPassword
-                  safeWriteSecret besu-node-validator-${i}-accountKeystore $FOLDER_PATH/${f}/accountKeystore 
-                  safeWriteSecret besu-node-validator-${i}-accountAddress $FOLDER_PATH/${f}/accountAddress 
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-accountPrivateKey $FOLDER_PATH/${f}/accountPrivateKey
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-accountPassword $FOLDER_PATH/${f}/accountPassword
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-accountKeystore $FOLDER_PATH/${f}/accountKeystore
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i}-accountAddress $FOLDER_PATH/${f}/accountAddress
 
 {{- else }}
-                  
-                  safeWriteSecret besu-node-validator-${i} "$FOLDER_PATH/${f}"
+
+                  safeWriteSecret besu-node-{{ .Release.Name | replace "genesis" "validator" }}-${i} "$FOLDER_PATH/${f}"
                   kubectl create configmap --namespace {{ .Release.Namespace }} besu-node-validator-${i}-address --from-file=address=$FOLDER_PATH/${f}/address
 
 {{- end }}
                   # add to the static-nodes
                   pubkey=$(cat $FOLDER_PATH/${f}/nodekey.pub )
-                  echo ",\"enode://$pubkey@besu-node-validator-$i-0.besu-node-validator-$i.{{ .Release.Namespace }}.svc.cluster.local:30303?discport=0\"" >> $FOLDER_PATH/static-nodes.json
+                  echo ",\"enode://$pubkey@besu-node-{{ .Release.Name | replace "genesis" "validator" }}-$i-0.besu-node-{{ .Release.Name | replace "genesis" "validator" }}-$i.{{ .Release.Namespace }}.svc.cluster.local:30303?discport=0\"" >> $FOLDER_PATH/static-nodes.json
 
                   i=$((i+1))
                 fi

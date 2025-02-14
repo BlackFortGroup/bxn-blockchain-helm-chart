@@ -1,0 +1,107 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+ name: besu-ingress-routes-mainnet
+ namespace: besu-mainnet
+ annotations:
+   kubernetes.io/ingress.class: nginx
+   nginx.ingress.kubernetes.io/ssl-redirect: "false"
+   nginx.ingress.kubernetes.io/use-regex: "true"
+   nginx.ingress.kubernetes.io/configuration-snippet: |
+     rewrite (?i)/tessera-[0-9]?/(.*) /$1 break;
+     rewrite (?i)/tessera-[0-9]?$ / break;
+     rewrite (?i)/kibana/(.*) /$1 break;
+     rewrite (?i)/kibana$ / break;
+   nginx.ingress.kubernetes.io/rewrite-target: /
+   #nginx.ingress.kubernetes.io/whitelist-source-range: w.x.y.z/32,a.b.c.d/32
+
+spec:
+ rules:
+ - host: rpc.blackfort.network
+   http:
+     paths:
+     - path: /mainnet/rpc
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-rpc-mainnet-1
+           port:
+             number: 8545
+     - path: /mainnet/validator-1
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-validator-mainnet-1
+           port:
+             number: 8545
+     - path: /mainnet/validator-2
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-validator-mainnet-2
+           port:
+             number: 8545
+     - path: /mainnet/validator-3
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-validator-mainnet-3
+           port:
+             number: 8545
+     - path: /mainnet/validator-4
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-validator-mainnet-4
+           port:
+             number: 8545
+     - path: /mainnet/validator-5
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-validator-mainnet-5
+           port:
+             number: 8545
+     - path: /mainnet/validator-6
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-validator-mainnet-6
+           port:
+             number: 8545
+     - path: /mainnet/member-1
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-member-mainnet-1
+           port:
+             number: 8545
+     - path: /mainnet/member-2
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-member-mainnet-2
+           port:
+             number: 8545
+     - path: /mainnet/member-3
+       pathType: Prefix
+       backend:
+         service:
+           name: besu-node-member-mainnet-3
+           port:
+             number: 8545
+     - path: /mainnet/kibana
+       pathType: Prefix
+       backend:
+         service:
+           name: kibana-kibana
+           port:
+             number: 5601
+     - path: /mainnet
+       pathType: Prefix
+       backend:
+         service:
+           name: monitoring-grafana
+           port:
+             number: 3000
