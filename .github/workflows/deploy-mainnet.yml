@@ -32,13 +32,14 @@ jobs:
 
       - name: Decrypt gpg secret
         run: |
-          gpg --quiet --batch --yes --decrypt --passphrase="$GPG_SECRET_PASSPHRASE" --output ./helm/charts/besu-genesis/genesis.json ./helm/genesis-mainnet.json.gpg
+#           gpg --quiet --batch --yes --decrypt --passphrase="$GPG_SECRET_PASSPHRASE" --output ./helm/charts/besu-genesis/genesis.json ./helm/genesis-mainnet.json.gpg
           gpg --quiet --batch --yes --decrypt --passphrase="$GPG_SECRET_PASSPHRASE" --output ./helm/validator-key-mainnet.yaml ./helm/validator-key-mainnet.yaml.gpg
         env:
           GPG_SECRET_PASSPHRASE: ${{ secrets.GPG_SECRET_PASSPHRASE }}
 
       - name: Deploy Genesis
         run: |
+          cp ./helm/genesis-mainnet.json ./helm/charts/besu-genesis/genesis.json
           helm upgrade -i genesis-mainnet ./helm/charts/besu-genesis -n ${{ vars.NAMESPACE }} --create-namespace --set node.besu.account.password=$ACCOUNT_PASSWORD --set rawGenesisConfig.blockchain.accountPassword=$ACCOUNT_PASSWORD -f ./helm/mainnet-values/genesis-besu.yml --values ./helm/validator-key-mainnet.yaml
 
       - name: Deploy Boot nodes
