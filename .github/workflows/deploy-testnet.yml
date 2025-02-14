@@ -31,8 +31,8 @@ jobs:
 
       - name: Decrypt gpg secret
         run: |
-#           gpg --quiet --batch --yes --decrypt --passphrase="$GPG_SECRET_PASSPHRASE" --output ./helm/charts/besu-genesis/genesis.json ./helm/genesis-testnet.json.gpg
           gpg --quiet --batch --yes --decrypt --passphrase="$GPG_SECRET_PASSPHRASE" --output ./helm/validator-key-testnet.yaml ./helm/validator-key-testnet.yaml.gpg
+#           gpg --quiet --batch --yes --decrypt --passphrase="$GPG_SECRET_PASSPHRASE" --output ./helm/charts/besu-genesis/genesis.json ./helm/genesis-testnet.json.gpg
         env:
           GPG_SECRET_PASSPHRASE: ${{ secrets.GPG_SECRET_PASSPHRASE }}
 
